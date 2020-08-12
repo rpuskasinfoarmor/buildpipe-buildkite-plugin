@@ -59,31 +59,49 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 		stepMap, _ := step.(map[interface{}]interface{})
 		env, _ := stepMap["env"].(map[interface{}]interface{})
 		value, ok := env["BUILDPIPE_SCOPE"]
-		if ok && value == "distinct" 
-			projectSteps := generateDistinctProjectSteps(step, projects)
-			for _, ps := range projectSteps {
-				skip := false
-				psMap, _ := ps.(map[interface{}]interface{})
-				psLabel, _ := psMap["label"]
-				for _, gs := range generatedSteps {
-					gsMap, _ := gs.(map[interface{}]interface{})
-					gsLabel, _ := gsMap["label"]
-					if gsLabel == psLabel {
-						skip = true
-			        }
-				} 
-				if(!skip) {
-					generatedSteps = append(generatedSteps, ps)
-				}
-			}
+		if ok && value == "project" {
+			projectSteps := generateProjectSteps(step, projects)
+			generatedSteps = append(generatedSteps, projectSteps...)
+		} else if ok && value == "distinct" {
+			projectSteps := generateProjectSteps(step, projects)
+			generatedSteps = append(generatedSteps, projectSteps...)
+			// projectSteps := generateDistinctProjectSteps(step, projects)
+			// for _, ps := range projectSteps {
+			// 	skip := false
+			// 	psMap, _ := ps.(map[interface{}]interface{})
+			// 	psLabel, _ := psMap["label"]
+			// 	for _, gs := range generatedSteps {
+			// 		gsMap, _ := gs.(map[interface{}]interface{})
+			// 		gsLabel, _ := gsMap["label"]
+			// 		if gsLabel == psLabel {
+			// 			skip = true
+			//         }
+			// 	} 
+			// 	if(!skip) {
+			// 		generatedSteps = append(generatedSteps, ps)
+			// 	}
+			// }
 		} else {
-			errors.New("Must be distinct")
+			errors.New("Must be a project or distinct")
 		}
 	}
 
 	return &Pipeline{
 		Steps: generatedSteps,
 	}
+}
+
+func Index(vs []interface{}, t interface{}) int {
+    for i, v := range vs {
+        if v == t {
+            return i
+        }
+    }
+    return -1
+}
+
+func Includes(vs []interface{}, t interface{}) bool {
+    return Index(vs, t) >= 0
 }
 
 func uploadPipeline(pipeline Pipeline) {
