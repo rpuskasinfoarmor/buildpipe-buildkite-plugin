@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-
+	"errors"
 	"github.com/mohae/deepcopy"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
@@ -44,7 +44,7 @@ func generateDistinctProjectSteps(step interface{}, projects []Project) []interf
 			env := stepCopyMap["env"].(map[interface{}]interface{})
 			env["BUILDPIPE_PROJECT_LABEL"] = project.Label
 			env["BUILDPIPE_PROJECT_PATH"] = project.getMainPath()
-			
+
 			projectSteps = append(projectSteps, stepCopy)
 		}
 	}
@@ -56,19 +56,8 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 	generatedSteps := make([]interface{}, 0)
 
 	for _, step := range steps {
-		stepMap, ok := step.(map[interface{}]interface{})
-		if !ok {
-			generatedSteps = append(generatedSteps, step)
-			continue
-		}
-
-		env, ok := stepMap["env"].(map[interface{}]interface{})
-
-		if !ok {
-			generatedSteps = append(generatedSteps, step)
-			continue
-		}
-
+		stepMap, _ := step.(map[interface{}]interface{})
+		env, _ := stepMap["env"].(map[interface{}]interface{})
 		value, ok := env["BUILDPIPE_SCOPE"]
 		if ok && value == "project" {
 			projectSteps := generateProjectSteps(step, projects)
@@ -91,26 +80,13 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 				}
 			}
 		} else {
-			generatedSteps = append(generatedSteps, step)
+			errors.New("Must be a project or distinct")
 		}
 	}
 
 	return &Pipeline{
 		Steps: generatedSteps,
 	}
-}
-
-func Index(vs []interface{}, t interface{}) int {
-    for i, v := range vs {
-        if v == t {
-            return i
-        }
-    }
-    return -1
-}
-
-func Includes(vs []interface{}, t interface{}) bool {
-    return Index(vs, t) >= 0
 }
 
 func uploadPipeline(pipeline Pipeline) {
