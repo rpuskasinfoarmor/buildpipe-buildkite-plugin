@@ -1,0 +1,33 @@
+projects:
+ - label: package
+   path: 
+     - package
+ - label: deploy
+   skip: package
+   path:
+     - deploy
+ - label: test
+   skip:
+     - package
+     - deploy
+   path: 
+      - test
+steps:
+  - label: package
+    env:
+      BUILDPIPE_SCOPE: distinct
+    command:
+      - make package
+  - wait
+  - label: deploy
+    env:
+      BUILDPIPE_SCOPE: distinct
+    command:
+      - make deploy
+  - wait
+  - label: test
+    env:
+      BUILDPIPE_SCOPE: distinct
+    command:
+      - make test
+  

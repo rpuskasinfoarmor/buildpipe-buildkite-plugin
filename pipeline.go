@@ -33,6 +33,21 @@ func generateProjectSteps(step interface{}, projects []Project) []interface{} {
 	return projectSteps
 }
 
+func generateDistinctProjectSteps(step interface{}, projects []Project) []interface{} {
+	projectSteps := make([]interface{}, 0)
+	for _, project := range projects {
+		stepCopy := deepcopy.Copy(step)
+		stepCopyMap := stepCopy.(map[interface{}]interface{})
+
+		if project.checkProjectRules(stepCopyMap) {
+			stepCopyMap["label"] = stepCopyMap["label"]
+			projectSteps = append(projectSteps, stepCopy)
+		}
+	}
+
+	return projectSteps
+}
+
 func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 	generatedSteps := make([]interface{}, 0)
 
@@ -44,6 +59,7 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 		}
 
 		env, ok := stepMap["env"].(map[interface{}]interface{})
+
 		if !ok {
 			generatedSteps = append(generatedSteps, step)
 			continue
@@ -53,6 +69,23 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 		if ok && value == "project" {
 			projectSteps := generateProjectSteps(step, projects)
 			generatedSteps = append(generatedSteps, projectSteps...)
+		} else if ok && value == "distinct" {
+			projectSteps := generateDistinctProjectSteps(step, projects)
+			for _, ps := range projectSteps {
+				skip := false
+				psMap, _ := ps.(map[interface{}]interface{})
+				psLabel, _ := psMap["label"]
+				for _, gs := range generatedSteps {
+					gsMap, _ := gs.(map[interface{}]interface{})
+					gsLabel, _ := gsMap["label"]
+					if gsLabel == psLabel {
+						skip = true
+			        }
+				} 
+				if(!skip) {
+					generatedSteps = append(generatedSteps, ps)
+				}
+			}
 		} else {
 			generatedSteps = append(generatedSteps, step)
 		}
@@ -61,6 +94,19 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 	return &Pipeline{
 		Steps: generatedSteps,
 	}
+}
+
+func Index(vs []interface{}, t interface{}) int {
+    for i, v := range vs {
+        if v == t {
+            return i
+        }
+    }
+    return -1
+}
+
+func Includes(vs []interface{}, t interface{}) bool {
+    return Index(vs, t) >= 0
 }
 
 func uploadPipeline(pipeline Pipeline) {
