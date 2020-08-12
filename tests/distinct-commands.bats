@@ -4,7 +4,7 @@ load "$BATS_PATH/load.bash"
 
 setup() {
   _GET_CHANGED_FILE='log --name-only --no-merges --pretty=format: origin..HEAD'
-  stub git "${_GET_CHANGED_FILE} : echo 'package/thing.txt'"
+  stub git "${_GET_CHANGED_FILE} : echo 'deploy/thing.txt'"
   stub buildkite-agent pipeline upload
 }
 
@@ -41,6 +41,8 @@ steps:
   - label: deploy
     command:
       - make deploy
+    env:
+      BUILDPIPE_SCOPE: distinct
   - wait
   - label: test
     env:

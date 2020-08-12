@@ -41,6 +41,10 @@ func generateDistinctProjectSteps(step interface{}, projects []Project) []interf
 
 		if project.checkProjectRules(stepCopyMap) {
 			stepCopyMap["label"] = stepCopyMap["label"]
+			env := stepCopyMap["env"].(map[interface{}]interface{})
+			env["BUILDPIPE_PROJECT_LABEL"] = project.Label
+			env["BUILDPIPE_PROJECT_PATH"] = project.getMainPath()
+			
 			projectSteps = append(projectSteps, stepCopy)
 		}
 	}
