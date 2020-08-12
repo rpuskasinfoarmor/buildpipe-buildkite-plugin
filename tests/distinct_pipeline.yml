@@ -1,13 +1,13 @@
 projects:
- - label: package
+ - label: package project
    path: 
      - package
- - label: deploy
+ - label: deploy project
    skip: 
     - package
    path:
      - deploy
- - label: test
+ - label: test project
    skip:
      - package
      - deploy
