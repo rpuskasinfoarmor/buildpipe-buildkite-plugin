@@ -59,10 +59,7 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 		stepMap, _ := step.(map[interface{}]interface{})
 		env, _ := stepMap["env"].(map[interface{}]interface{})
 		value, ok := env["BUILDPIPE_SCOPE"]
-		if ok && value == "project" {
-			projectSteps := generateProjectSteps(step, projects)
-			generatedSteps = append(generatedSteps, projectSteps...)
-		} else if ok && value == "distinct" {
+		if ok && value == "distinct" 
 			projectSteps := generateDistinctProjectSteps(step, projects)
 			for _, ps := range projectSteps {
 				skip := false
@@ -80,7 +77,7 @@ func generatePipeline(steps []interface{}, projects []Project) *Pipeline {
 				}
 			}
 		} else {
-			errors.New("Must be a project or distinct")
+			errors.New("Must be distinct")
 		}
 	}
 
