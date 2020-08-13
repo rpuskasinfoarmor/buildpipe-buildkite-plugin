@@ -1,11 +1,11 @@
 #!/bin/bash
 set -euo pipefail
 
-buildpipe_version="${BUILDKITE_PLUGIN_BUILDPIPE_VERSION:-0.11.2}"
+buildpipe_version="${BUILDKITE_PLUGIN_BUILDPIPE_VERSION:-0.11.3}"
 is_test="${BUILDKITE_PLUGIN_BUILDPIPE_TEST_MODE:-false}"
 
 if [[ "$is_test" == "false" ]]; then
-  curl -Lf -o buildpipe https://github.com/jwplayer/buildpipe-buildkite-plugin/releases/download/v${buildpipe_version}/buildpipe-linux \
+  curl -Lf -o buildpipe https://github.com/rpuskas/buildpipe-buildkite-plugin/releases/download/v${buildpipe_version}/buildpipe-linux \
     && chmod +x buildpipe
 fi
 
