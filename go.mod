@@ -1,4 +1,4 @@
-module github.com/jwplayer/buildpipe-buildkite-plugin
+module github.com/rpuskasinfoarmor/buildpipe-buildkite-plugin
 
 go 1.13
 
